@@ -4,6 +4,23 @@ import utm
 
 
 def trgr_model(TX_coords, RX_coords, m, n, l, h_TX, h_RX, h_prime, wavelength, G_TX, G_RX, e_r):
+    """
+    Find the channel matrix H and phase/amplitude of two-ray ground reflection model for MIMO
+
+    :param TX_coords: Latitude/longitude coordinates of transmitter (i.e. drone or pole)
+    :param RX_coords: Latitude/longitude coordinates of one RX antenna (first row, rightmost)
+    :param m: Number of RX antenna rows in MIMO
+    :param n: Number of RX antenna in each row
+    :param l: Horizontal distance between each RX antenna in same row (MIMO)
+    :param h_TX: Height of transmitter
+    :param h_RX: Height of receiver
+    :param h_prime: Vertical distance between each row of RX antennas (MIMO)
+    :param wavelength: wavelength of signal (assumed equal for each pair of TX and RX antennas)
+    :param G_TX: Gain of transmitter
+    :param G_RX: Gain of receiver
+    :param e_r: relative permittivity (ex: ground, metal bleachers)
+    :return:
+    """
 
     # Model is indexed from 1 ~ m or 1 ~ n, but due to Python syntax, here it is indexed from 0 ~ m-1 or 0 ~ n-1
 
