@@ -3,7 +3,7 @@ import math
 import utm
 
 
-def fspl_model(TX_coords, RX_coords, m, n, l, h_TX, h_RX, h_prime, wavelength, G_TX, G_RX):
+def trgr_model(TX_coords, RX_coords, m, n, l, h_TX, h_RX, h_prime, wavelength, G_TX, G_RX, e_r):
 
     # Model is indexed from 1 ~ m or 1 ~ n, but due to Python syntax, here it is indexed from 0 ~ m-1 or 0 ~ n-1
 
@@ -29,14 +29,24 @@ def fspl_model(TX_coords, RX_coords, m, n, l, h_TX, h_RX, h_prime, wavelength, G
 
         # Iterate through each antenna on row of RX MIMO
         for j in range(n):
-            # Compute p_(i,j), the true distance between RX and TX antennas in 3D
-            p_ij = abs(math.sqrt((d_1j[j]) ** 2 + (h + i * h_prime) ** 2))
+            # Compute p_LOS_(i,j), the true line-of-sight distance between TX and RX antennas in 3D
+            p_LOS_ij = abs(math.sqrt((d_1j[j]) ** 2 + (h + i * h_prime) ** 2))
 
-            # Calculate the phase
-            phase = 2 * math.pi * p_ij / wavelength
+            # Compute p_REF_(i,j), the true reflected distance between TX and RX antennas in 3D
+            p_REF_ij = abs(math.sqrt((d_1j[j]) ** 2 + (h_TX + h_RX + i * h_prime) ** 2))
+
+            # Compute the reflection coefficient, and the theta along with it
+            theta_ij = math.atan((h_TX + h_RX + i * h_prime) / d_1j[j])
+
+            c = math.sqrt(e_r - (math.cos(theta_ij)) ** 2)
+
+            r_ij = (math.sin(theta_ij) - c) / (math.sin(theta_ij) + c)
+
+            # Calculate the phase difference
+            phase = 2 * math.pi * (p_REF_ij - p_LOS_ij) / wavelength
 
             # Calculate the gain amplitude
-            amp = G_TX * G_RX * ((wavelength / (4 * math.pi * p_ij)) ** 2)
+            amp = G_TX * G_RX * ((wavelength / (4 * math.pi)) ** 2) * (abs(1/p_LOS_ij + r_ij * math.exp(-1j * phase)/p_REF_ij) ** 2)
 
             # Fill in phase and amp values for this pair of antennas
             phase_and_amp[i][j] = (phase, amp)
@@ -66,6 +76,5 @@ def d11_and_phi(TX_coords, RX_coords):
 
     return d_11, phi
 
-# tangent = math.sqrt(3)
-# print(math.degrees(math.atan(tangent)))
+
 
